@@ -1,0 +1,17 @@
+# Vivado
+*.cache
+*.hw
+*.ioplanning
+*.ip_user_files
+*.runs
+*.sim
+.Xil/
+example
+
+# VS Code
+.vscode
+
+# Sigasi
+.settings
+.library_mapping.xml
+.project

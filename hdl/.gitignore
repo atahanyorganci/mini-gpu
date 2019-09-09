@@ -6,7 +6,7 @@
 *.runs
 *.sim
 .Xil/
-example
+vivado*.*
 
 # VS Code
 .vscode

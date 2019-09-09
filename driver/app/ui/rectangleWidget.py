@@ -1,5 +1,5 @@
 from PyQt5.QtCore import pyqtSlot
-from PyQt5.QtWidgets import QWidget, QPushButton, QFormLayout, QLabel, QLineEdit, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QPushButton, QFormLayout, QLabel, QLineEdit, QVBoxLayout, QCheckBox
 
 from app.display.rectangle import Rectangle
 
@@ -11,7 +11,7 @@ class RectangleWidget(QWidget):
         self.properties = PropertiesWidget()
         self.position = PositionWidget()
         self.okButton = QPushButton("OK")
-        self.okButton.clicked.connect(self.on_click)
+        self.okButton.clicked.connect(self.check_rectangle)
         self.init()
 
     def init(self):
@@ -23,12 +23,11 @@ class RectangleWidget(QWidget):
         layout.addWidget(self.okButton)
         self.setLayout(layout)
 
-    @pyqtSlot()
-    def on_click(self):
+    def check_rectangle(self):
         try:
-            rectangle = Rectangle(*self.position.getData(), *self.properties.getData())
+            rectangle = Rectangle(*self.position.data(), *self.properties.data())
             print(rectangle)
-        except ValueError as ex:
+        except ValueError:
             print("Invalid data is entered")
 
 
@@ -45,7 +44,7 @@ class PositionWidget(QWidget):
         layout.addRow(QLabel('Vertical Corner'), self.vcorner)
         self.setLayout(layout)
 
-    def getData(self) -> tuple:
+    def data(self) -> tuple:
         return int(self.hcorner.text()), int(self.vcorner.text())
 
 
@@ -68,6 +67,31 @@ class PropertiesWidget(QWidget):
         layout.addRow(QLabel('Blue'), self.blue)
         self.setLayout(layout)
 
-    def getData(self) -> tuple:
+    def data(self) -> tuple:
         return int(self.width.text()), int(self.height.text()), \
                int(self.red.text()), int(self.green.text()), int(self.blue.text())
+
+
+class TransitionWidget(QWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.enable = QCheckBox()
+        self.loop = QCheckBox()
+        self.rate = QLineEdit()
+        self.init()
+
+    def init(self):
+        layout = QFormLayout()
+        self.enable.setChecked(True)
+        self.enable.toggled.connect(self.toggle)
+        layout.addRow(QLabel("Enable transitions"), self.enable)
+        self.loop.setChecked(True)
+        layout.addRow(QLabel("Loop"), self.loop)
+        layout.addRow(QLabel("Refresh Rate (ms)"), self.rate)
+        self.setLayout(layout)
+
+    def toggle(self):
+        state = self.enable.isChecked()
+        self.loop.setEnabled(state)
+        self.rate.setEnabled(state)

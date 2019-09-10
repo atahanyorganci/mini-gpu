@@ -1,11 +1,15 @@
 from PyQt5.QtWidgets import QWidget, QPushButton, QFormLayout, QLabel, QLineEdit, QVBoxLayout, QSlider
+from PyQt5.QtCore import pyqtSignal
 
-from app.display.rectangle import Rectangle
+
 from app.display.position import Position
+from app.display.rectangle import Rectangle
 from app.ui.transitionWidget import TransitionWidget
 
 
 class RectangleWidget(QWidget):
+    write = pyqtSignal([bytes])
+    rectangle: Rectangle
 
     def __init__(self):
         super().__init__()
@@ -31,25 +35,26 @@ class RectangleWidget(QWidget):
         self.setLayout(layout)
 
     def serial_send(self):
-        valid, r = self.check_rectangle()
+        valid = self.check_rectangle()
         if not valid:
             return
         enable, loop, rate, dist, pos = self.transition.data()
         if enable:
-            r.add_transition(loop, rate, dist, *pos)
+            self.rectangle.add_transition(loop, rate, dist, *pos)
         else:
-            r.remove_transition()
-
+            self.rectangle.remove_transition()
+        self.rectangle.send.connect(self.write)
+        self.rectangle.start()
 
     def check_rectangle(self):
         try:
             p = Position(*self.position.data())
-            r = Rectangle(p, *self.properties.data())
-            return True, r
+            self.rectangle = Rectangle(p, *self.properties.data())
+            return True
         except ValueError:
             self.position.reset()
             self.properties.reset()
-            return False, None
+            return False
 
 
 class PositionWidget(QWidget):

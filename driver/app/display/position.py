@@ -11,6 +11,14 @@ class Position:
     def __add__(self, other):
         return Position(self.x + other.x, self.y + other.y)
 
+    def __iadd__(self, other):
+        self.x += other.x
+        self.y += other.y
+        return self
+
+    def __sub__(self, other):
+        return Position(self.x - other.x, self.y - other.y)
+
     def __str__(self):
         return f"Position(x={self.x}, y={self.y})"
 

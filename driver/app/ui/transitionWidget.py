@@ -121,11 +121,11 @@ class PointViewWidget(QWidget):
         self.init()
 
     def init(self):
-        self.setLayout(QFormLayout())
-        self.layout().addRow(QLabel("Horizontal Position"), QLabel(str(self.x)))
-        self.layout().addRow(QLabel("Veritcal Position"), QLabel(str(self.y)))
+        self.setLayout(QHBoxLayout())
+        self.layout().addWidget(QLabel(f"H. Position: {str(self.x)}"))
+        self.layout().addWidget(QLabel(f"V. Position: {str(self.y)}"))
         self.button.clicked.connect(self.on_click)
-        self.layout().addRow(self.button)
+        self.layout().addWidget(self.button)
 
     @pyqtSlot()
     def on_click(self):

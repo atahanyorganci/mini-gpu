@@ -1,5 +1,4 @@
-from PyQt5.QtWidgets import QDialog, QWidget, QFormLayout, QLabel, QComboBox, QLineEdit, QPushButton, QHBoxLayout
-import PyQt5
+from PyQt5.QtWidgets import QDialog, QFormLayout, QLabel, QComboBox, QLineEdit, QPushButton, QHBoxLayout
 from app.serial import BAUDRATE, PARITY, STOP_BIT, BYTE_SIZE
 
 

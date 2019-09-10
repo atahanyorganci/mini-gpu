@@ -50,7 +50,7 @@ class SerialConfigWidget(QDialog):
         self.setLayout(layout)
 
     def default(self):
-        # These are magic numbers should be changed when chaning constants in serial.__init__ file
+        # These are magic numbers should be changed when changing constants in serial.__init__ file
         self.port.setText("COM4")
         self.baudrate.setCurrentIndex(12)
         self.byte_size.setCurrentIndex(3)

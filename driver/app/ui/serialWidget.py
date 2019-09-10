@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QDialog, QFormLayout, QHBoxLayout
 from app.ui.serialConfigWidget import SerialConfigWidget
 from serial import Serial
-from app.display.rectangle import Rectangle
 
 
 class SerialWidget(QWidget):

@@ -6,6 +6,7 @@ import serial
 class Wrapper(QObject):
 
     def __init__(self):
+        super(Wrapper, self).__init__()
         self.serial = serial.Serial()
 
     def configure(self, port="", baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, stopbits=STOPBITS_ONE):
@@ -19,7 +20,6 @@ class Wrapper(QObject):
     def close(self):
         self.serial.close()
 
-    @pyqtSlot(bytes)
     def write_bytes(self, sequence):
-        print(sequence)
+        print(bytes(sequence))
         self.serial.writelines(sequence)

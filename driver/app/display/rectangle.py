@@ -4,6 +4,7 @@ from PyQt5.QtCore import QBasicTimer, QObject, pyqtSignal
 
 
 class Rectangle(QObject):
+    send = pyqtSignal([bytes])
     timer: QBasicTimer
     velocity: Position
     index: int
@@ -26,7 +27,6 @@ class Rectangle(QObject):
         self.count = 0
         self.current = 0
         self.index = 0
-        self.send = pyqtSignal([bytes])
 
     def __str__(self):
         return f"Rectangle(current={str(self.position)}, positions={str(self.positions)}"
@@ -65,7 +65,7 @@ class Rectangle(QObject):
             next_pos = self.positions[self.index]
             self.position = Position(next_pos.x, next_pos.y)
             self.timer.stop()
-        self.send.emit(bytes(self))
+        self.send.emit(self)
 
     def __bytes__(self):
         return bytes([1, self.red, self.green, self.blue,

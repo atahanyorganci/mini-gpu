@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
-from app.serial import Serial
 from app.ui.rectangleWidget import RectangleWidget
 from app.ui.serialWidget import SerialWidget
 
@@ -11,7 +10,7 @@ class App(QWidget):
         super().__init__()
         self.rectangleWidget = RectangleWidget()
         self.serialWidget = SerialWidget()
-        self.serial = Serial
+        self.serialWidget.serial.connect(self.rectangleWidget.configure)
         self.init()
 
     def init(self):

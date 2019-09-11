@@ -98,7 +98,7 @@ end component;
 		);
 	end component bank;
 
-	constant c_BAUDRATE   : integer := 9600;
+	constant c_BAUDRATE   : integer := 115200;
 	constant c_CLOCK_FREQ : integer := 200000000;
 
 	-- Clock Wizard

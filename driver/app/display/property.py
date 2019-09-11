@@ -17,6 +17,10 @@ class Property:
         self.green = green
         self.blue = blue
 
+    def __str__(self):
+        return f"Property(width={self.width}, height={self.height}, " + \
+               f"red={hex(self.red)}, green={hex(self.green)}, blue={hex(self.blue)}"
+
     def __bytes__(self):
         return bytes([self.red, self.green, self.blue,
                       self.width % 256, self.width // 256,

@@ -1,8 +1,9 @@
+from PyQt5.QtCore import pyqtSignal, pyqtSlot
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QFormLayout, QLabel, QPushButton, \
     QSpinBox
+
 from app.config import Display
 from app.display.position import Position
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
 
 
 class TransitionWidget(QWidget):
@@ -21,9 +22,8 @@ class TransitionWidget(QWidget):
 
     def data(self):
         position = self.point.data()
-        empty = len(position) == 0
         enable, *rest = self.config.data()
-        enable = enable and not empty
+        enable = enable and bool(position)
         return (enable, *rest, position)
 
     @pyqtSlot(bool)
@@ -40,7 +40,7 @@ class TransitionConfigWidget(QWidget):
         self.enable = QCheckBox()
         self.loop = QCheckBox()
         self.rate = QSpinBox()
-        self.velocity = QSpinBox()
+        self.count = QSpinBox()
         self.init()
 
     def init(self):
@@ -51,23 +51,22 @@ class TransitionConfigWidget(QWidget):
         self.loop.setChecked(True)
         layout.addRow(QLabel("Loop"), self.loop)
         self.rate.setSingleStep(50)
-        self.rate.setValue(50)
-        self.rate.setMinimum(25)
+        self.rate.setMinimum(5)
         self.rate.setMaximum(1000)
         layout.addRow(QLabel("Refresh Rate (ms)"), self.rate)
-        self.velocity.setMaximum(20)
-        layout.addRow(QLabel("Distance (pixels)"), self.velocity)
+        self.count.setMaximum(1000)
+        layout.addRow(QLabel("Screen Count"), self.count)
         self.setLayout(layout)
 
     def data(self) -> tuple:
-        return self.enable.isChecked(), self.loop.isChecked(), self.rate.value(), self.velocity.value()
+        return self.enable.isChecked(), self.loop.isChecked(), self.rate.value(), self.count.value()
 
     @pyqtSlot()
     def toggle(self):
         state = self.enable.isChecked()
         self.loop.setEnabled(state)
         self.rate.setEnabled(state)
-        self.velocity.setEnabled(state)
+        self.count.setEnabled(state)
         self.toggle_transition.emit(state)
 
 

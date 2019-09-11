@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QDialog, QFormLayout, QLabel, QComboBox, QLineEdit, QPushButton, QHBoxLayout
-from app.serial import BAUDRATE, PARITY, STOP_BIT, BYTE_SIZE
+
+from app.serial import BAUD_RATE, PARITY, STOP_BIT, BYTE_SIZE
 
 
 class SerialConfigWidget(QDialog):
@@ -27,7 +28,7 @@ class SerialConfigWidget(QDialog):
         # Port Select
         layout.addRow(QLabel("Channel"), self.port)
         # Baud rate select
-        self.baudrate.addItems([str(rate) for rate in BAUDRATE])
+        self.baudrate.addItems([str(rate) for rate in BAUD_RATE])
         layout.addRow(QLabel("Baud Rate"), self.baudrate)
         # Data bits select
         self.byte_size.addItems(BYTE_SIZE.keys())
@@ -51,7 +52,7 @@ class SerialConfigWidget(QDialog):
     def default(self):
         # These are magic numbers should be changed when changing constants in serial.__init__ file
         self.port.setText("COM4")
-        self.baudrate.setCurrentIndex(12)
+        self.baudrate.setCurrentIndex(16)
         self.byte_size.setCurrentIndex(3)
         self.parity.setCurrentIndex(0)
         self.stop_bit.setCurrentIndex(0)
@@ -60,7 +61,7 @@ class SerialConfigWidget(QDialog):
         return {
             "port": self.port.text(),
             "bytesize": BYTE_SIZE[self.byte_size.currentText()],
-            "baudrate": BAUDRATE[self.baudrate.currentIndex()],
+            "baudrate": BAUD_RATE[self.baudrate.currentIndex()],
             "parity": PARITY[self.parity.currentText()],
             "stopbits": STOP_BIT[self.stop_bit.currentText()],
         }

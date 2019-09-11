@@ -1,25 +1,27 @@
-from PyQt5.QtCore import QObject, pyqtSlot
-from serial import EIGHTBITS, PARITY_NONE, STOPBITS_ONE
 import serial
+from serial import EIGHTBITS, PARITY_NONE, STOPBITS_ONE
 
 
-class Wrapper(QObject):
+class Wrapper:
 
     def __init__(self):
-        super(Wrapper, self).__init__()
         self.serial = serial.Serial()
 
-    def configure(self, port="", baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, stopbits=STOPBITS_ONE):
-        self.serial = serial.Serial(baudrate=baudrate, bytesize=bytesize, parity=parity, stopbits=stopbits)
-        if port != "":
-            self.serial.port = port
+    def configure(self, port="COM4", baudrate=9600, bytesize=EIGHTBITS, parity=PARITY_NONE, stopbits=STOPBITS_ONE):
+        self.serial = serial.Serial(port=port, baudrate=baudrate, bytesize=bytesize, parity=parity, stopbits=stopbits)
+        if self.serial.is_open:
+            self.serial.close()
 
-    def open(self):
+    def open(self) -> None:
         self.serial.open()
 
-    def close(self):
+    def close(self) -> None:
         self.serial.close()
 
-    def write_bytes(self, sequence):
+    def write_bytes(self, sequence) -> None:
         print(bytes(sequence))
-        self.serial.writelines(sequence)
+        for byte in bytes(sequence):
+            self.serial.write(byte)
+
+    def ready(self) -> bool:
+        return self.serial.writable()

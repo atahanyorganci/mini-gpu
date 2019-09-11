@@ -1,13 +1,14 @@
+import serial
+from PyQt5.QtCore import QBasicTimer
 from PyQt5.QtWidgets import QWidget, QPushButton, QFormLayout, QLabel, QLineEdit, QVBoxLayout, QSlider
-from app.serial import Serial
-from PyQt5.QtCore import pyqtSlot
-from app.display.position import Position
+
 from app.display.rectangle import Rectangle
 from app.ui.transitionWidget import TransitionWidget
 
 
 class RectangleWidget(QWidget):
     rectangle: Rectangle
+    config: dict
 
     def __init__(self):
         super().__init__()
@@ -16,46 +17,60 @@ class RectangleWidget(QWidget):
         self.validate = QPushButton("Validate")
         self.transition = TransitionWidget()
         self.send = QPushButton("Send")
+        self.timer = QBasicTimer()
+        self.port = serial.Serial()
         self.init()
 
     def init(self):
-        layout = QVBoxLayout()
-        layout.addWidget(QLabel("Properties"))
-        layout.addWidget(self.properties)
-        layout.addWidget(QLabel("Position"))
-        layout.addWidget(self.position)
-        self.validate.clicked.connect(self.check_rectangle)
-        layout.addWidget(self.validate)
-        layout.addWidget(QLabel("Transition"))
-        layout.addWidget(self.transition)
-        self.send.clicked.connect(self.serial_send)
-        layout.addWidget(self.send)
-        self.setLayout(layout)
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(QLabel("Properties"))
+        self.layout().addWidget(self.properties)
+        self.layout().addWidget(QLabel("Position"))
+        self.layout().addWidget(self.position)
+        self.validate.clicked.connect(self.on_validate)
+        self.layout().addWidget(self.validate)
+        self.layout().addWidget(QLabel("Transition"))
+        self.layout().addWidget(self.transition)
+        self.send.clicked.connect(self.on_send)
+        self.layout().addWidget(self.send)
 
-    def serial_send(self):
-        valid = self.check_rectangle()
-        if not valid:
-            return
-        enable, loop, rate, dist, pos = self.transition.data()
-        if enable:
-            self.rectangle.add_transition(loop, rate, dist, *pos)
-        else:
-            self.rectangle.remove_transition()
-        self.rectangle.send.connect(self.serial_write)
-        self.rectangle.start()
+    def configure(self, config):
+        self.config = config
+        self.port = serial.Serial(**self.config)
 
-    def check_rectangle(self):
+    def on_send(self):
+        if bool(self.config) and self.__validate():
+            enable, loop, rate, count, positions = self.transition.data()
+            if enable:
+                for position in positions:
+                    self.rectangle.add_transition(loop, count, position)
+                iter(self.rectangle)
+                self.timer.start(rate, self)
+            if not self.port.is_open:
+                self.port.open()
+            self.port.write(bytes(self.rectangle))
+
+    def timerEvent(self, event) -> None:
         try:
-            p = Position(*self.position.data())
-            self.rectangle = Rectangle(p, *self.properties.data())
-            return True
-        except ValueError:
+            next(self.rectangle)
+            self.port.write(bytes(self.rectangle))
+        except StopIteration:
+            self.timer.stop()
+            self.port.close()
+
+    def on_validate(self):
+        if not self.__validate():
             self.position.reset()
             self.properties.reset()
-            return False
 
-    def serial_write(self, sequence):
-        Serial.write_bytes(sequence)
+    def __validate(self):
+        try:
+            pos = self.position.data()
+            prop = self.properties.data()
+            self.rectangle = Rectangle(*pos, *prop)
+        except ValueError:
+            return False
+        return True
 
 
 class PositionWidget(QWidget):

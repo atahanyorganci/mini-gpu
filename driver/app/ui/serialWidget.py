@@ -1,10 +1,13 @@
+import serial
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QLabel, QPushButton, QDialog, QFormLayout, QHBoxLayout
+
 from app.ui.serialConfigWidget import SerialConfigWidget
-from app.serial import Serial
 
 
 class SerialWidget(QWidget):
     NOT_CONFIGURED = "Not configured"
+    serial = pyqtSignal([dict])
 
     def __init__(self):
         super().__init__()
@@ -61,12 +64,18 @@ class SerialWidget(QWidget):
             self.set_button_state()
 
     def serial_connect(self):
-        Serial.configure(**self.configuration)
-        Serial.open()
-        self.connected = True
-        self.set_button_state()
+        try:
+            port = serial.Serial(**self.configuration)
+            if not port.is_open:
+                port.open()
+            port.close()
+            self.connected = True
+            self.set_button_state()
+            self.serial.emit(self.configuration)
+        finally:
+            pass
 
     def serial_disconnect(self):
-        Serial.close()
+        self.serial.emit({})
         self.connected = False
         self.set_button_state()

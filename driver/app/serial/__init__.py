@@ -1,9 +1,6 @@
 import serial
-from app.serial.wrapper import Wrapper
 
-Serial = Wrapper()
-
-BAUDRATE = [50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
+BAUD_RATE = [50, 75, 110, 134, 150, 200, 300, 600, 1200, 1800, 2400, 4800, 9600, 19200, 38400, 57600, 115200]
 
 BYTE_SIZE = {
     "5": serial.FIVEBITS,

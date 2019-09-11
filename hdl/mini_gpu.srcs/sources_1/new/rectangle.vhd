@@ -110,18 +110,18 @@ begin
 						when "100" =>
 							s_Color <= s_Color(11 downto 4) & s_DataOut(3 downto 0);
 						when "101" =>
-							s_HCorner <= to_integer(unsigned(s_DataOut));
-						when "110" =>
-							s_VCorner <= to_integer(unsigned(s_DataOut));
-						when "111" =>
 							s_Width <= to_integer(unsigned(s_DataOut));
+						when "110" =>
+							s_Height <= to_integer(unsigned(s_DataOut));
+						when "111" =>
+							s_HCorner <= to_integer(unsigned(s_DataOut));
 							s_State <= Config;
 						when others =>
 							s_State   <= Idle;
 							s_Address <= "000";
 					end case;
 				when Config =>
-					s_Height <= to_integer(unsigned(s_DataOut));
+					s_VCorner <= to_integer(unsigned(s_DataOut));
 					s_State  <= Calculate;
 				when Calculate =>
 					s_HOffset <= s_HCorner + s_Width;

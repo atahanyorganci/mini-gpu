@@ -1,16 +1,13 @@
-from app.display.position import Position
-from app.display.property import Property
 from app.display.transition import Transition
 
 
 class Rectangle:
 
-    def __init__(self, hcorner, vcorner, width, height, red, green, blue):
+    def __init__(self, position, properties):
         super().__init__()
-        self.position = Position(hcorner, vcorner)
-        self.property = Property(width, height, red, green, blue)
+        self.position = position
+        self.property = properties
         self.transition = Transition()
-        self.iter = None
 
     def __str__(self):
         return f"Rectangle(properties={str(self.property)}, position={str(self.position)}"

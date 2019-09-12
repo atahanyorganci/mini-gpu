@@ -75,6 +75,8 @@ class SerialWidget(QWidget):
                                     "baudrate": Serial.BAUD_RATE[self.baud_rate.currentIndex()],
                                     "parity": Serial.PARITY[self.parity.currentText()],
                                     "stopbits": Serial.STOP_BIT[self.stop_bit.currentText()]})
+        self.configured = True
+        self.set_button_state()
 
     def on_open(self):
         self.serial_open.emit()
@@ -82,6 +84,6 @@ class SerialWidget(QWidget):
         self.set_button_state()
 
     def on_close(self):
-        self.serial_close.emit({})
+        self.serial_close.emit()
         self.connected = False
         self.set_button_state()

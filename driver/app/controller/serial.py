@@ -7,7 +7,7 @@ class SerialController:
         self.__serial = serial.Serial()
 
     def configure(self, configuration: dict):
-        self.__serial = serial.Serial(configuration)
+        self.__serial = serial.Serial(**configuration)
         if self.__serial.is_open:
             self.__serial.close()
 

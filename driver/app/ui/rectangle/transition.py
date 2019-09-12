@@ -1,6 +1,6 @@
 from PyQt5.QtCore import pyqtSignal, pyqtSlot
-from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QFormLayout, QLabel, QPushButton, \
-    QSpinBox
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QFormLayout, QLabel, QPushButton, QSpinBox, \
+    QFrame
 
 from app.config import Display
 from app.display.position import Position
@@ -10,26 +10,23 @@ class TransitionWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.config = TransitionConfigWidget()
-        self.point = TransitionPointWidget()
-        self.state = True
+        self.list = ListWidget()
         self.init()
 
     def init(self):
         self.setLayout(QHBoxLayout())
         self.config.toggle_transition.connect(self.toggle)
         self.layout().addWidget(self.config)
-        self.layout().addWidget(self.point)
+        self.layout().addWidget(self.list)
 
-    def data(self):
-        position = self.point.data()
-        enable, *rest = self.config.data()
-        enable = enable and bool(position)
-        return (enable, *rest, position)
+    def data(self) -> tuple:
+        positions = self.list.data()
+        config, loop, rate, count = self.config.data()
+        enable = config and bool(positions)
+        return enable, loop, rate, count, positions
 
-    @pyqtSlot(bool)
     def toggle(self, state):
-        self.state = state
-        self.point.setEnabled(self.state)
+        self.list.setEnabled(state)
 
 
 class TransitionConfigWidget(QWidget):
@@ -44,25 +41,28 @@ class TransitionConfigWidget(QWidget):
         self.init()
 
     def init(self):
-        layout = QFormLayout()
+        # Add Widgets
+        self.setLayout(QFormLayout())
+        self.layout().addRow(QLabel("Enable transitions"), self.enable)
+        self.layout().addRow(QLabel("Screen Count"), self.count)
+        self.layout().addRow(QLabel("Loop"), self.loop)
+        self.layout().addRow(QLabel("Refresh Rate (ms)"), self.rate)
+
+        # Configure Widgets
         self.enable.setChecked(True)
-        self.enable.toggled.connect(self.toggle)
-        layout.addRow(QLabel("Enable transitions"), self.enable)
+        self.enable.toggled.connect(self.on_enable)
         self.loop.setChecked(True)
-        layout.addRow(QLabel("Loop"), self.loop)
-        self.rate.setSingleStep(50)
-        self.rate.setMinimum(5)
+        self.rate.setSingleStep(10)
+        self.rate.setMinimum(10)
         self.rate.setMaximum(1000)
-        layout.addRow(QLabel("Refresh Rate (ms)"), self.rate)
+        self.count.setMinimum(1)
         self.count.setMaximum(1000)
-        layout.addRow(QLabel("Screen Count"), self.count)
-        self.setLayout(layout)
+        self.count.setValue(50)
 
     def data(self) -> tuple:
         return self.enable.isChecked(), self.loop.isChecked(), self.rate.value(), self.count.value()
 
-    @pyqtSlot()
-    def toggle(self):
+    def on_enable(self):
         state = self.enable.isChecked()
         self.loop.setEnabled(state)
         self.rate.setEnabled(state)
@@ -70,87 +70,64 @@ class TransitionConfigWidget(QWidget):
         self.toggle_transition.emit(state)
 
 
-class TransitionPointWidget(QWidget):
-
-    def __init__(self):
-        super().__init__()
-        self.point = PointWidget()
-        self.container = PointViewContainerWidget()
-        self.init()
-
-    def init(self):
-        self.setLayout(QVBoxLayout())
-        self.layout().addWidget(QLabel("Points"))
-        self.layout().addWidget(self.point)
-        self.point.added.connect(self.container.add_point)
-        self.layout().addWidget(self.container)
-
-    def data(self):
-        return [Position(point.x, point.y) for point in self.container.points]
-
-
-class PointViewContainerWidget(QWidget):
-
-    @pyqtSlot(int, int)
-    def add_point(self, x, y):
-        point = PointViewWidget(x, y, len(self.points))
-        point.remove.connect(self.remove_point)
-        self.points.append(point)
-        self.layout().addWidget(point)
-
-    @pyqtSlot(int)
-    def remove_point(self, index):
-        self.layout().removeWidget(self.points.pop(index))
-
-    def __init__(self):
-        super().__init__()
-        self.points = []
-        self.setLayout(QVBoxLayout())
-
-
-class PointViewWidget(QWidget):
-    remove = pyqtSignal([int])
-
-    def __init__(self, horizontal, vertical, index):
-        super().__init__()
-        self.x = horizontal
-        self.y = vertical
-        self.index = index
-        self.button = QPushButton("Remove")
-        self.init()
-
-    def init(self):
-        self.setLayout(QHBoxLayout())
-        self.layout().addWidget(QLabel(f"H. Position: {str(self.x)}"))
-        self.layout().addWidget(QLabel(f"V. Position: {str(self.y)}"))
-        self.button.clicked.connect(self.on_click)
-        self.layout().addWidget(self.button)
-
-    @pyqtSlot()
-    def on_click(self):
-        self.remove.emit(self.index)
-
-
-class PointWidget(QWidget):
+class ListWidget(QWidget):
     added = pyqtSignal([int, int])
 
     def __init__(self):
         super().__init__()
+        self.positions = []
         self.add = QPushButton("Add")
         self.horizontal = QSpinBox()
         self.vertical = QSpinBox()
         self.init()
 
     def init(self):
-        layout = QHBoxLayout()
-        self.horizontal.setMaximum(Display.WIDTH)
-        layout.addWidget(self.horizontal)
-        self.vertical.setMaximum(Display.HEIGHT)
-        layout.addWidget(self.vertical)
-        self.add.clicked.connect(self.on_click)
-        layout.addWidget(self.add)
-        self.setLayout(layout)
+        # Add widgets
+        self.setLayout(QVBoxLayout())
+        self.layout().addWidget(QLabel("Transition Points"))
+        config = QFrame()
+        config.setLayout(QHBoxLayout())
+        config.layout().addWidget(self.horizontal)
+        config.layout().addWidget(self.vertical)
+        config.layout().addWidget(self.add)
+        self.layout().addWidget(config)
 
-    @pyqtSlot()
+        # Configure widgets and connect signals
+        self.horizontal.setMaximum(Display.WIDTH)
+        self.vertical.setMaximum(Display.HEIGHT)
+        self.add.clicked.connect(self.on_click)
+
     def on_click(self):
-        self.added.emit(self.horizontal.value(), self.vertical.value())
+        pos = Position(self.horizontal.value(), self.vertical.value())
+        self.positions.append(pos)
+        new = PositionWidget(pos)
+        new.remove.connect(self.remove)
+        self.layout().addWidget(new)
+
+    def data(self) -> list:
+        return self.positions
+
+    def remove(self, widget: QWidget):
+        self.layout().removeWidget(widget)
+
+
+class PositionWidget(QWidget):
+    remove = pyqtSignal([QWidget])
+
+    def __init__(self, position: Position):
+        super().__init__()
+        self.position = position
+        self.button = QPushButton("Remove")
+        self.init()
+
+    def init(self):
+        # Add widgets
+        self.setLayout(QHBoxLayout())
+        self.layout().addWidget(QLabel(str(self.position)))
+        self.layout().addWidget(self.button)
+
+        # Connect Signals
+        self.button.clicked.connect(self.on_click)
+
+    def on_click(self):
+        self.remove.emit(self)

@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QBasicTimer, pyqtSignal
-from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QFrame, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QPushButton, QLabel, QFrame, QHBoxLayout, QVBoxLayout, QTabWidget
 
 from app.display.rectangle import Rectangle
 from app.ui.rectangle.position import PositionWidget
@@ -7,12 +7,31 @@ from app.ui.rectangle.properties import PropertiesWidget
 from app.ui.rectangle.transition import TransitionWidget
 
 
+class RectangleTabWidget(QWidget):
+    serial_write = pyqtSignal([bytes])
+
+    def __init__(self):
+        super(RectangleTabWidget, self).__init__()
+        self.setLayout(QVBoxLayout())
+        self.tabs = QTabWidget()
+        self.rectangles = [RectangleWidget(i) for i in range(4)]
+        self.init()
+
+    def init(self):
+        for i, rectangle in enumerate(self.rectangles):
+            self.tabs.addTab(rectangle, f"Rectangle {i + 1}")
+            rectangle.serial_write.connect(self.serial_write)
+        self.tabs.resize(500, 500)
+        self.layout().addWidget(self.tabs)
+
+
 class RectangleWidget(QWidget):
     rectangle: Rectangle
     serial_write = pyqtSignal([bytes])
 
-    def __init__(self):
+    def __init__(self, index: int):
         super().__init__()
+        self.index = index
         self.properties = PropertiesWidget()
         self.position = PositionWidget()
         self.transition = TransitionWidget()
@@ -52,9 +71,10 @@ class RectangleWidget(QWidget):
         prop = self.properties.data()
         if pos is None or prop is None:
             return
-        self.rectangle = Rectangle(pos, prop)
+        self.rectangle = Rectangle(self.index, pos, prop)
         enable, loop, rate, count, positions = self.transition.data()
         if enable:
+            self.rectangle.reset_transition()
             self.rectangle.configure_transition(loop, count)
             for position in positions:
                 self.rectangle.add_transition(position)

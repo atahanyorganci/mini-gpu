@@ -1,4 +1,4 @@
-from PyQt5.QtCore import pyqtSignal, pyqtSlot
+from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QCheckBox, QFormLayout, QLabel, QPushButton, QSpinBox, \
     QFrame
 
@@ -53,11 +53,11 @@ class TransitionConfigWidget(QWidget):
         self.enable.toggled.connect(self.on_enable)
         self.loop.setChecked(True)
         self.rate.setSingleStep(10)
-        self.rate.setMinimum(10)
+        self.rate.setMinimum(20)
         self.rate.setMaximum(1000)
-        self.count.setMinimum(1)
-        self.count.setMaximum(1000)
-        self.count.setValue(50)
+        self.count.setMinimum(20)
+        self.count.setMaximum(200)
+        self.count.setValue(5)
 
     def data(self) -> tuple:
         return self.enable.isChecked(), self.loop.isChecked(), self.rate.value(), self.count.value()

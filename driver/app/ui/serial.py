@@ -12,8 +12,6 @@ class SerialWidget(QWidget):
     def __init__(self):
         super().__init__()
         self.configuration = {}
-        self.configured = False
-        self.connected = False
 
         self.state = QLabel()
         self.port = QLineEdit()
@@ -46,20 +44,20 @@ class SerialWidget(QWidget):
         buttons.addWidget(self.configure)
         buttons.addWidget(self.open)
         buttons.addWidget(self.close)
-        self.set_button_state()
+        self.on_state()
         self.layout().addRow(buttons)
 
         # Connect Signals
         self.default.clicked.connect(self.on_default)
         self.configure.clicked.connect(self.on_configure)
-        self.open.clicked.connect(self.on_open)
-        self.close.clicked.connect(self.on_close)
+        self.open.clicked.connect(self.serial_open)
+        self.close.clicked.connect(self.serial_close)
 
-    def set_button_state(self):
-        self.default.setEnabled(not self.connected)
-        self.configure.setEnabled(not self.connected)
-        self.open.setEnabled(self.configured and not self.connected)
-        self.close.setEnabled(self.connected)
+    def on_state(self, connected=False, configured=False):
+        self.default.setEnabled(not connected)
+        self.configure.setEnabled(not connected)
+        self.open.setEnabled(configured and not connected)
+        self.close.setEnabled(configured and connected)
 
     def on_default(self):
         # These are magic numbers should be changed when changing constants in controller.__init__ file
@@ -75,15 +73,3 @@ class SerialWidget(QWidget):
                                     "baudrate": Serial.BAUD_RATE[self.baud_rate.currentIndex()],
                                     "parity": Serial.PARITY[self.parity.currentText()],
                                     "stopbits": Serial.STOP_BIT[self.stop_bit.currentText()]})
-        self.configured = True
-        self.set_button_state()
-
-    def on_open(self):
-        self.serial_open.emit()
-        self.connected = True
-        self.set_button_state()
-
-    def on_close(self):
-        self.serial_close.emit()
-        self.connected = False
-        self.set_button_state()

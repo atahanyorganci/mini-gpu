@@ -1,12 +1,13 @@
-from app.display.transition import Transition
 from app.display.position import Position
 from app.display.property import Property
+from app.display.transition import Transition
 
 
 class Rectangle:
 
-    def __init__(self, position: Position, properties: Property, transition=Transition()):
+    def __init__(self, index: int, position: Position, properties: Property, transition=Transition()):
         super().__init__()
+        self.index = index
         self.position = position
         self.property = properties
         self.transition = transition
@@ -41,4 +42,4 @@ class Rectangle:
         return self
 
     def __bytes__(self):
-        return bytes([1]) + bytes(self.property) + bytes(self.position)
+        return bytes([self.index * 2 + 1]) + bytes(self.property) + bytes(self.position)

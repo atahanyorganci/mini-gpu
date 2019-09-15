@@ -43,10 +43,10 @@ class Transition:
         dist = second - first
         speed = Position(dist.x // self.__count, dist.y // self.__count)
         if not self.__ipoints:
-            self.__ipoints.append(first.copy())
+            self.__ipoints.append(Position.copy(first))
         for _ in range(self.__count - 1):
             self.__ipoints.append(self.__ipoints[-1] + speed)
-        self.__ipoints.append(second.copy())
+        self.__ipoints.append(Position.copy(second))
 
     def __bool__(self):
         return bool(self.__points) and bool(self.__count)

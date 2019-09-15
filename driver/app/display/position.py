@@ -9,8 +9,9 @@ class Position:
         self.x = x
         self.y = y
 
-    def copy(self):
-        return Position(self.x, self.y)
+    @classmethod
+    def copy(cls, position):
+        return cls(position.x, position.y)
 
     def __eq__(self, value):
         return self.x == value.x and self.y == value.y

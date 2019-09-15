@@ -26,6 +26,7 @@ class RectangleTabWidget(QWidget):
 
 
 class RectangleWidget(QWidget):
+    iter: iter
     rectangle: Rectangle
     serial_write = pyqtSignal([bytes])
 
@@ -78,15 +79,14 @@ class RectangleWidget(QWidget):
             self.rectangle.configure_transition(loop, count)
             for position in positions:
                 self.rectangle.add_transition(position)
-            iter(self.rectangle)
+            self.iter = iter(self.rectangle)
             self.timer.start(rate, self)
-        print(self.rectangle)
         self.serial_write.emit(bytes(self.rectangle))
 
     def timerEvent(self, event) -> None:
         try:
-            print(self.rectangle)
-            next(self.rectangle)
-            self.serial_write.emit(bytes(self.rectangle))
+            new = next(self.iter)
+            print(new)
+            self.serial_write.emit(bytes(new))
         except StopIteration:
             self.timer.stop()

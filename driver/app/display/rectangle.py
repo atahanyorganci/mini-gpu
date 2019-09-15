@@ -30,16 +30,7 @@ class Rectangle:
         self.transition = Transition()
 
     def __iter__(self):
-        iter(self.transition)
-        return self
-
-    def __next__(self):
-        try:
-            position = next(self.transition)
-            self.position = position
-        except StopIteration:
-            raise StopIteration
-        return self
+        return iter(self.transition)
 
     def __bytes__(self):
         return bytes([self.index * 2 + 1]) + bytes(self.property) + bytes(self.position)

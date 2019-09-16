@@ -30,7 +30,7 @@ class Rectangle:
         self.transition = Transition()
 
     def __iter__(self):
-        return iter(self.transition)
+        return iter([Rectangle(self.index, t, self.property) for t in self.transition])
 
     def __bytes__(self):
         return bytes([self.index * 2 + 1]) + bytes(self.property) + bytes(self.position)
